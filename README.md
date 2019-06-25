@@ -1,4 +1,4 @@
-# CFT-model-extractor
+# CFW-model-extractor
 Conquest: Frontier Wars model extractor
 
 This script can extract the model information from the .3db model files and export it to Wavefront obj.
