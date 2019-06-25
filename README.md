@@ -10,8 +10,11 @@ This script can extract the model information from the .3db model files and expo
 ## Running the script
 
 ```
-python app.py path/to/file <outpout-file-name>
+python extractor.py path/to/file [options]
+Options:
+    -o <file>                           Output file name
+    -s <floating point value>           Scale of the model
 ```
 
-If the output file name is not given, it will use the path of the source, just the .3db extension replaced with .obj.
-
+- If the output file name is not given, it will use the path of the source, just the .3db extension replaced with .obj.
+- Default scale is 1.    
