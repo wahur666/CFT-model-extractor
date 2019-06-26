@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
-from filereader3db import *
 from obj_generator import *
 
 
@@ -63,26 +62,11 @@ if __name__ == '__main__':
 
     filename = sys.argv[1]
 
-    g = Graph()
     a = UtfFile()
+    model_data = a.load_utf_file(filename)
 
-    modeldata = a.load_utf_file(filename)
-    #print(get_as_string(modeldata["\\"]["Exporter Version"]['value']))
-
-    print()
-
-    data = get_as_float_list(modeldata['\\']['openFLAME 3D N-mesh']['Vertices']['Object vertex list']['value'])
-    for i in range(0, len(data), 3):
-        g.add_vertex(Vertex(float(data[i]), float(data[i + 2]), float(data[i + 1]), scale))
-
-    data = get_as_int_list(modeldata['\\']['openFLAME 3D N-mesh']['Edges']['Vertex list']['value'])
-    for i in range(0, len(data), 2):
-        g.add_edge(Edge(int(data[i]), int(data[i + 1])))
-
-    g.get_all_vertices()
-    g.generate_triangles()
-    g.fix_ordering(False)
-    g.generate_polygons_for_obj(output_filename, True)
+    g = ObjModel(model_data)
+    g.export_to_obj(output_filename, scale)
 
     print("Done")
 
