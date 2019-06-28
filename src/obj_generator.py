@@ -146,11 +146,11 @@ class ObjModel:
                 outfile.write(f"Kd {mat.diffuse.get_formatted_vertex_list()}\n")
                 outfile.write(f"Ks {mat.specular.get_formatted_vertex_list()}\n")
                 outfile.write(f"illum 2\n")
-                outfile.write(f"Ns {mat.shininess * 100}\n")
+                outfile.write(f"Ns {mat.shininess * 50}\n")
 
                 if mat.has_texture:
                     outfile.write(f"map_Kd {mat.diffuse_map}\n")
-                    outfile.write(f"bump {mat.bump_map}\n")
+                    outfile.write(f"map_Bump {mat.bump_map}\n")
 
                 outfile.write("\n")
 
