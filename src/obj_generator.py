@@ -43,20 +43,26 @@ class TextureCoords:
 class Material:
 
     def __init__(self, material):
-        self.diffuse = Vertex(*get_as_float_list(material['Diffuse']['Constant']['value']))
-        self.ambient = Vertex(*get_as_float_list(material['Ambient']['Constant']['value']))
-        self.specular = Vertex(*get_as_float_list(material['Specular']['Constant']['value']))
-        self.shininess = get_as_float_list(material['Shininess']['Constant']['value'])[0]
+        self.diffuse = Vertex(*self.get_constant(material['Diffuse']))
+        self.ambient = Vertex(*self.get_constant(material['Ambient']))
+        self.specular = Vertex(*self.get_constant(material['Specular']))
+        self.shininess = self.get_constant(material['Shininess'])[0]
         self.name = str(material['name']).replace(" ", "_").replace("#", "_")
         self.id = get_as_int_list(material['Material identifier']['value'])[0]
-        basename = get_as_string(material['Diffuse']['Map']['Name']['value']).split(".")
         self.has_texture = False
-        if len(basename) > 1:
-            filename = basename[0]
-            self.diffuse_map = filename + "_color.tga"
-            self.bump_map = filename + "_bump.tga"
-            self.has_texture = True
+        if 'Map' in material['Diffuse']:
+            basename = get_as_string(material['Diffuse']['Map']['Name']['value']).split(".")
+            if len(basename) > 1:
+                filename = basename[0]
+                self.diffuse_map = filename + "_color.tga"
+                self.bump_map = filename + "_bump.tga"
+                self.has_texture = True
 
+    def get_constant(self, material):
+        if "Constant" in material:
+            return get_as_float_list(material['Constant']['value'])
+        else:
+            return get_as_float_list(material['value'])
 
 class FaceGroup:
 
@@ -139,7 +145,7 @@ class ObjModel:
 
             outfile.write("#%d Faces" % triangles)
 
-        with open(material_filename, "w") as outfile:
+        with open(os.path.join(os.path.dirname(path),material_filename), "w") as outfile:
             for mat in self.materials:
                 outfile.write(f"newmtl {mat.name}\n")
                 outfile.write(f"Ka {mat.ambient.get_formatted_vertex_list()}\n")
