@@ -5,7 +5,7 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from obj_generator import *
 
-VERSION = 0.1
+VERSION = "0.1.1"
 
 class Gui:
 
@@ -15,16 +15,26 @@ class Gui:
         self.scale = 1
 
     def open_input_file(self):
-        self.filename = filedialog.askopenfile(initialdir=f"{os.getcwd()}", title="Select file",
+        filename = filedialog.askopenfile(initialdir=f"{os.getcwd()}", title="Select file",
                                filetypes=(("3db files", "*.3db"), ("all files", "*.*")))
-        if self.filename:
+        if filename:
+            self.filename = filename
             self.v_input_name.set(self.filename.name)
             self.v_output_name.set(default_output_name(self.filename.name))
             self.v_material_name.set(default_material_name(self.filename.name))
 
     def open_output_file(self):
-        self.output_filename = filedialog.asksaveasfilename(initialdir=f"{os.getcwd()}", title="Select file",
+        output_filename: str = filedialog.asksaveasfilename(initialdir=f"{os.path.dirname(self.v_output_name.get())}", title="Select file",
                                      filetypes=(("Wavefront OBJ", "*.obj"), ("all files", "*.*")))
+        if output_filename:
+            self.output_filename = output_filename
+            if not self.output_filename.endswith(".obj"):
+                self.output_filename += ".obj"
+
+            if self.output_filename:
+                self.v_output_name.set(self.output_filename)
+                self.v_material_name.set(self.output_filename.replace("obj", "mtl"))
+
     def load_gui(self):
         self.window = Tk()
         window = self.window
