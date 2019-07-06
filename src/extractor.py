@@ -5,7 +5,7 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from obj_generator import *
 
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 
 class Gui:
 
@@ -16,7 +16,7 @@ class Gui:
 
     def open_input_file(self):
         filename = filedialog.askopenfile(initialdir=f"{os.getcwd()}", title="Select file",
-                               filetypes=(("3db files", "*.3db"), ("all files", "*.*")))
+                               filetypes=(("all files", "*.*"), ("3db files", "*.3db"), ("cmp files", "*.cmp") ))
         if filename:
             self.filename = filename
             self.v_input_name.set(self.filename.name)
@@ -131,8 +131,19 @@ def print_help():
 def extract(filename, output_filename, scale):
     a = UtfFile()
     model_data = a.load_utf_file(filename)
-    g = ObjModel(model_data)
-    g.export_to_obj(output_filename, scale)
+    if filename.endswith('.3db'):
+        g = ObjModel()
+        g.export_to_obj(model_data['\\']['openFLAME 3D N-mesh'], output_filename, scale)
+    elif filename.endswith('.cmp'):
+        basename = output_filename
+        counter = 0
+        for k, v in model_data['\\'].items():
+            if k.endswith('.3db'):
+                a = basename.split(".")
+                a[-2] += "_" + k.split(".")[0]
+                output_filename = ".".join(a)
+                g = ObjModel()
+                g.export_to_obj(v['openFLAME 3D N-mesh'], output_filename, scale)
     print("Done")
 
 

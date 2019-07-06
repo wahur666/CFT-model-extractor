@@ -72,8 +72,7 @@ class FaceGroup:
 
 class ObjModel:
 
-    def __init__(self, model):
-        self.model = model
+    def __init__(self):
         self.vertices = []
         self.face_groups = []
         self.surface_normals = []
@@ -83,9 +82,8 @@ class ObjModel:
         self.texture_batch_list = []
         self.materials: List[Material] = []
 
-
-    def export_to_obj(self, path, scale=1):
-        mesh = self.model['\\']['openFLAME 3D N-mesh']
+    def export_to_obj(self, mesh, path, scale=1):
+        #mesh = self.model['\\']['openFLAME 3D N-mesh']
 
         self.create_vertices(mesh)
 
