@@ -143,7 +143,12 @@ def extract(filename, output_filename, scale):
                 a[-2] += "_" + k.split(".")[0]
                 output_filename = ".".join(a)
                 g = ObjModel()
-                g.export_to_obj(v['openFLAME 3D N-mesh'], output_filename, scale)
+                coords = get_as_float_list(v['Rigid body']['Extent tree']['Sphere 1']['Transform']['value'])
+                identity = np.identity(4)
+                a = coords[-3:]
+                for ind, value in enumerate(a):
+                    identity[ind][3] = value
+                g.export_to_obj(v['openFLAME 3D N-mesh'], output_filename, scale, identity)
     print("Done")
 
 
