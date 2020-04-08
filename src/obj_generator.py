@@ -42,11 +42,14 @@ class TextureCoords:
 
 class Material:
 
-    def __init__(self, material):
+    def __init__(self, material: Dict):
         self.diffuse = Vertex(*self.get_constant(material['Diffuse']))
         self.ambient = Vertex(*self.get_constant(material['Ambient']))
         self.specular = Vertex(*self.get_constant(material['Specular']))
-        self.shininess = self.get_constant(material['Shininess'])[0]
+        if 'Shininess' in material:
+            self.shininess = self.get_constant(material['Shininess'])[0]
+        else:
+            self.shininess = None
         self.name = str(material['name']).replace(" ", "_").replace("#", "_")
         self.id = get_as_int_list(material['Material identifier']['value'])[0]
         self.has_texture = False
@@ -150,7 +153,8 @@ class ObjModel:
                 outfile.write(f"Kd {mat.diffuse.get_formatted_vertex_list()}\n")
                 outfile.write(f"Ks {mat.specular.get_formatted_vertex_list()}\n")
                 outfile.write(f"illum 2\n")
-                outfile.write(f"Ns {mat.shininess * 50}\n")
+                if mat.shininess:
+                    outfile.write(f"Ns {mat.shininess * 50}\n")
 
                 if mat.has_texture:
                     outfile.write(f"map_Kd {mat.diffuse_map}\n")
