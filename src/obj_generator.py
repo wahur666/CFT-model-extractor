@@ -2,27 +2,30 @@
 # -*- coding: utf-8 -*-
 from filereader3db import *
 import os
+import numpy as np
 
 class Vertex:
     def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.vertices = np.array([x, y, z, 1])
 
     def scale_vertex(self, scale):
-        self.x *= scale
-        self.y *= scale
-        self.z *= scale
+        identity = np.identity(4)
+        for i in range(3):
+            identity[i][i] = scale
+
+        self.vertices = identity.dot(self.vertices)
 
     def get_formatted_vertex_list(self):
-        return f"{format(self.x, 'f')} {format(self.y, 'f')} {format(self.z, 'f')} "
+        return f"{format(self.vertices[0], 'f')} {format(self.vertices[1], 'f')} {format(self.vertices[2], 'f')} "
 
     def __str__(self):
-        return f"Vertex X={self.x} Y={self.y} Z={self.z}"
+        return f"Vertex X={self.vertices[0]} Y={self.vertices[1]} Z={self.vertices[2]}"
 
     def __repr__(self):
-        return f"Vertex X={self.x} Y={self.y} Z={self.z}"
+        return f"Vertex X={self.vertices[0]} Y={self.vertices[1]} Z={self.vertices[2]}"
 
+    def translate(self, matrix: np.ndarray):
+        self.vertices = matrix.dot(self.vertices)
 
 class TextureCoords:
 
@@ -85,7 +88,7 @@ class ObjModel:
         self.texture_batch_list = []
         self.materials: List[Material] = []
 
-    def export_to_obj(self, mesh, path, scale=1):
+    def export_to_obj(self, mesh, path, scale=1, translation_matrix=np.identity(4)):
         #mesh = self.model['\\']['openFLAME 3D N-mesh']
 
         self.create_vertices(mesh)
@@ -105,6 +108,7 @@ class ObjModel:
         with open(path, "w") as outfile:
             outfile.write(f"mtllib {material_filename}\n\n")
             for vertex in self.vertices:
+                vertex.translate(translation_matrix)
                 vertex.scale_vertex(scale)
                 s = "v " + vertex.get_formatted_vertex_list()
                 outfile.write(s + "\n")

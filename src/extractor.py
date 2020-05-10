@@ -4,6 +4,7 @@ import sys
 from tkinter import *
 from tkinter import filedialog, messagebox
 from obj_generator import *
+from prisData import CmpPartData, Part
 
 VERSION = "0.2.1"
 
@@ -128,6 +129,26 @@ def print_help():
     exit(1)
 
 
+def get_parent_origin(all_data: List[Part], part: Part):
+    parent_part = [x for x in all_data if x.child_name == part.parent_name]
+    if parent_part:
+        this_part = parent_part[0]
+        this_origin = [this_part.origin_x, this_part.origin_y, this_part.origin_z]
+        parent_origin = get_parent_origin(all_data, this_part)
+        return [sum(x) for x in zip(parent_origin, this_origin)]
+    else:
+        return [0, 0, 0]
+
+def get_parent_rotation(all_data: List[Part], part: Part):
+    parent_part = [x for x in all_data if x.child_name == part.parent_name]
+    if parent_part:
+        this_part = parent_part[0]
+        this_rot = this_part.rot_mat()
+        parent_rot = get_parent_rotation(all_data, this_part)
+        return this_rot.dot(parent_rot)
+    else:
+        return np.identity(4)
+
 def extract(filename, output_filename, scale):
     a = UtfFile()
     model_data = a.load_utf_file(filename)
@@ -135,15 +156,39 @@ def extract(filename, output_filename, scale):
         g = ObjModel()
         g.export_to_obj(model_data['\\']['openFLAME 3D N-mesh'], output_filename, scale)
     elif filename.endswith('.cmp'):
+        already_calculated_values = {}
         basename = output_filename
-        counter = 0
+        v = model_data['\\']['Cmpnd']
+        prisData = CmpPartData(v['Cons']['Pris'])
+        # print(prisData.parts)
+        revData = CmpPartData(v['Cons']['Rev'])
+        # print(revData.parts)
+        all_data: List[Part] = [*prisData.parts, * revData.parts]
         for k, v in model_data['\\'].items():
             if k.endswith('.3db'):
                 a = basename.split(".")
                 a[-2] += "_" + k.split(".")[0]
                 output_filename = ".".join(a)
                 g = ObjModel()
-                g.export_to_obj(v['openFLAME 3D N-mesh'], output_filename, scale)
+                pos_data: List[Part] = [x for x in all_data if k.startswith(x.child_name)]
+                local_transform = np.identity(4)
+                if pos_data:
+                    pos_data_t: Part = pos_data[0]
+                    coords = [pos_data_t.origin_x, pos_data_t.origin_y, pos_data_t.origin_z]
+                    if pos_data_t.child_name in already_calculated_values:
+                        local_transform = already_calculated_values[pos_data_t.child_name].dot(pos_data_t.rot_mat())
+                        local_transform[0][3] += pos_data_t.origin_x
+                        local_transform[1][3] += pos_data_t.origin_y
+                        local_transform[2][3] += pos_data_t.origin_z
+                    else:
+                        parent_origin = get_parent_origin(all_data, pos_data_t)
+                        coords = [sum(x) for x in zip(parent_origin, coords)]
+                        for i in range(len(coords)):
+                            local_transform[i][3] = coords[i]
+                        local_transform = local_transform.dot(get_parent_rotation(all_data, pos_data_t))
+                        local_transform = local_transform.dot(pos_data_t.rot_mat())
+                    already_calculated_values[pos_data_t.child_name] = local_transform
+                g.export_to_obj(v['openFLAME 3D N-mesh'], output_filename, scale, local_transform)
     print("Done")
 
 
