@@ -5,7 +5,7 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from obj_generator import *
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 class Gui:
 
