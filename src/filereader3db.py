@@ -26,16 +26,18 @@ def get_as_string(data: bytearray):
 def get_int(data: bytes, pos: int) -> (int, int):
     return int.from_bytes(data[pos:pos + 4], sys.byteorder, signed=True), pos + 4
 
+def get_float(data: bytes, pos: int) -> (float, int):
+    return struct.unpack("f", data[pos:pos+4])[0], pos+4
 
-def get_string(data:bytes, start_index: int, max_length: int):
+def get_string(data:bytes, start_index: int, max_length: int) -> (str, int):
     try:
-        length = data.index(bytes(0), start_index, start_index+max_length)
+        length = list(data).index(0, start_index, start_index+max_length)
     except:
         length = max_length
 
     start_index += max_length
     t = start_index-max_length
-    return data[t:t+length], start_index
+    return data[t:length].decode('ascii'), start_index
 
 
 class UtfFile:

@@ -105,8 +105,8 @@ class ObjModel:
         with open(path, "w") as outfile:
             outfile.write(f"mtllib {material_filename}\n\n")
             for vertex in self.vertices:
+                vertex.translate(translation_matrix)
                 vertex.scale_vertex(scale)
-                #vertex.translate(translation_matrix)
                 s = "v " + vertex.get_formatted_vertex_list()
                 outfile.write(s + "\n")
 
