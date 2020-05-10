@@ -6,7 +6,7 @@ from tkinter import filedialog, messagebox
 from obj_generator import *
 from prisData import CmpPartData, Part
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 class Gui:
 
