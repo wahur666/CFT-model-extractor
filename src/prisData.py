@@ -30,7 +30,7 @@ class Part:
         self.min: float = 0
         self.max: float = 0
 
-    def rot_mat(self):
+    def trans_mat(self):
         rot_matrix = np.zeros((4, 4))
 
         rot_matrix[0][0] = self.rot_mat_xx
@@ -45,9 +45,12 @@ class Part:
         rot_matrix[2][1] = self.rot_mat_zy
         rot_matrix[2][2] = self.rot_mat_zz
 
-        rot_matrix[3][3] = 1
+        rot_matrix[0][3] = self.origin_x
+        rot_matrix[1][3] = self.origin_y
+        rot_matrix[2][3] = self.origin_z
 
         return rot_matrix
+
 
 class CmpPartData:
 

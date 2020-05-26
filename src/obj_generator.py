@@ -4,6 +4,7 @@ from filereader3db import *
 import os
 import numpy as np
 
+
 class Vertex:
     def __init__(self, x, y, z):
         self.vertices = np.array([x, y, z, 1])
@@ -26,6 +27,7 @@ class Vertex:
 
     def translate(self, matrix: np.ndarray):
         self.vertices = matrix.dot(self.vertices)
+
 
 class TextureCoords:
 
@@ -70,11 +72,13 @@ class Material:
         else:
             return get_as_float_list(material['value'])
 
+
 class FaceGroup:
 
     def __init__(self, face_group):
         self.vertex_chain = get_as_int_list(face_group['Face vertex chain']['value'])
         self.material_index = get_as_int_list(face_group['Material']['value'])[0]
+
 
 class ObjModel:
 
@@ -89,7 +93,7 @@ class ObjModel:
         self.materials: List[Material] = []
 
     def export_to_obj(self, mesh, path, scale=1, translation_matrix=np.identity(4)):
-        #mesh = self.model['\\']['openFLAME 3D N-mesh']
+        # mesh = self.model['\\']['openFLAME 3D N-mesh']
 
         self.create_vertices(mesh)
 
@@ -101,7 +105,7 @@ class ObjModel:
 
         self.vertex_batch_list = get_as_int_list(mesh['Vertices']['Vertex batch list']['value'])
 
-        basename =  str(os.path.basename(path)).split(".")[0]
+        basename = str(os.path.basename(path)).split(".")[0]
         material_filename = basename + ".mtl"
         self.create_materials(mesh)
 
@@ -126,8 +130,6 @@ class ObjModel:
 
             outfile.write(f"#{len(self.surface_normals)} Normals \n\n")
 
-
-
             triangles = 0
             outfile.write(f"o {basename}\n")
             for face_group_index in range(len(self.face_groups)):
@@ -145,12 +147,13 @@ class ObjModel:
                     normal_1 = self.vertex_normals[vertex_1 - 1] + 1
                     normal_2 = self.vertex_normals[vertex_2 - 1] + 1
                     normal_3 = self.vertex_normals[vertex_3 - 1] + 1
-                    outfile.write(f"f {vertex_1}/{uv_1}/{normal_1} {vertex_2}/{uv_2}/{normal_2} {vertex_3}/{uv_3}/{normal_3} \n")
+                    outfile.write(
+                        f"f {vertex_1}/{uv_1}/{normal_1} {vertex_2}/{uv_2}/{normal_2} {vertex_3}/{uv_3}/{normal_3} \n")
                     triangles += 1
 
             outfile.write("#%d Faces" % triangles)
 
-        with open(os.path.join(os.path.dirname(path),material_filename), "w") as outfile:
+        with open(os.path.join(os.path.dirname(path), material_filename), "w") as outfile:
             for mat in self.materials:
                 outfile.write(f"newmtl {mat.name}\n")
                 outfile.write(f"Ka {mat.ambient.get_formatted_vertex_list()}\n")
@@ -165,7 +168,6 @@ class ObjModel:
                     outfile.write(f"map_Bump {mat.bump_map}\n")
 
                 outfile.write("\n")
-
 
     def create_normals(self, mesh):
         data = get_as_float_list(mesh['Normals']['Surface normal list']['value'])
@@ -195,4 +197,3 @@ class ObjModel:
         for key in material_lib.keys():
             if key not in ['name', 'value', 'text', 'Material count']:
                 self.materials.append(Material(material_lib[key]))
-
